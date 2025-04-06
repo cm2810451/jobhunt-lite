@@ -1,16 +1,15 @@
-FROM node:18 AS builder
+# Dockerfile
 
+# Step 1: Build the React app
+FROM node:18-alpine AS builder
 WORKDIR /app
-
-COPY package*.json ./
-RUN npm install
-
 COPY . .
+RUN npm install
 RUN npm run build
 
-FROM nginx:alpine
-COPY --from=builder /app/dist /usr/share/nginx/html
-EXPOSE 80
-
-
-CMD ["nginx", "-g", "daemon off;"]
+# Step 2: Serve using `serve`
+FROM node:18-alpine
+WORKDIR /app
+RUN npm install -g serve
+COPY --from=builder /app/dist ./dist
+CMD ["serve", "-s", "dist"]
